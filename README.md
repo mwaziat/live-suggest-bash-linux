@@ -4,6 +4,8 @@ Lightweight, zero-dependency **live inline autosuggestion** and **dropdown compl
 
 No `apt` packages, no `zsh`, no `fish`, and no background daemon required.
 
+![Demo](assets/demo.gif)
+
 ## Features
 
 - **Inline ghost-text suggestion** on the right of your cursor as you type.
