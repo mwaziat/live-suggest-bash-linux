@@ -237,9 +237,9 @@ def render(tty_fd, start_row, prompt_colored, prompt_len, buf, cursor_idx, ghost
     os.write(tty_fd, "".join(out).encode("utf-8", errors="ignore"))
 
 
-def clear_below_and_finish(tty_fd, start_row, prompt_colored, buf):
-    """Clear dropdown list and leave prompt + buffer clean on current row."""
-    out = f"\x1b[{start_row};1H\x1b[K{prompt_colored}{buf}\x1b[J"
+def clear_below_and_finish(tty_fd, start_row):
+    """Clear current row and dropdown list so Readline can redraw PS1 cleanly once."""
+    out = f"\x1b[{start_row};1H\x1b[K\x1b[J\x1b[{start_row};1H"
     os.write(tty_fd, out.encode("utf-8", errors="ignore"))
 
 
@@ -281,19 +281,20 @@ def main():
             if key is None:
                 continue
             if key == "ENTER":
-                clear_below_and_finish(tty_fd, start_row, prompt_colored, buf)
+                final_cmd = items[selected_idx] if (0 <= selected_idx < len(items)) else buf
+                clear_below_and_finish(tty_fd, start_row)
                 if out_file:
                     with open(out_file, "w", encoding="utf-8") as f:
-                        f.write(buf)
+                        f.write(final_cmd)
                 sys.exit(0)
             elif key in ("CTRL_C", "ESC"):
-                clear_below_and_finish(tty_fd, start_row, prompt_colored, "")
+                clear_below_and_finish(tty_fd, start_row)
                 if out_file:
                     with open(out_file, "w", encoding="utf-8") as f:
                         f.write("")
                 sys.exit(1)
             elif key == "CTRL_D" and not buf:
-                clear_below_and_finish(tty_fd, start_row, prompt_colored, "")
+                clear_below_and_finish(tty_fd, start_row)
                 sys.exit(1)
             elif key == "RIGHT":
                 if cursor_idx == len(buf) and ghost:
